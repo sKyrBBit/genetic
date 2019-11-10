@@ -1,4 +1,12 @@
 import random
+import matplotlib.pyplot as mp
+
+
+def mp_initialize():
+    mp.xlim(1, 8192)
+    mp.ylim(1, 8192)
+    mp.xscale('log')
+    mp.yscale('log')
 
 
 class Gene:
@@ -15,36 +23,42 @@ class Gene:
         return "({0}, {1})".format(self.x, self.y)
 
 
-# distance from (0, 0)
+# distance from (1, 1)
 def distance(x, y):
-    return x * x + y * y
+    p = x - 1
+    q = y - 1
+    return p * p + q * q
 
 
 def generate():
     global genes
+    generation = 0
     while True:
+        generation += 1
         saved = save()      # save the best gene
-        if saved.x == 0 and saved.y == 0:
+        if saved.x == 1 and saved.y == 1:
             return saved
         tmp = [saved]
-        for j in range(3):  # mutate
+        for j in range(1):  # mutate
             tmp.append(mutate())
         a = best()
         genes.remove(a)
         b = best()
         genes.remove(b)
-        for j in range(3):  # cross dominant gene
+        for j in range(4):  # cross dominant gene
             tmp.append(cross(a, b))
         a = best()
         genes.remove(a)
         b = best()
         genes.remove(b)
-        for j in range(1):  # cross recessive gene
+        for j in range(2):  # cross recessive gene
             tmp.append(cross(a, b))
         genes = tmp
-        for gene in genes:
-            print(gene.__str__(), end=", ")
-        print("\b\b")
+        mp.title("generation={0}".format(generation))
+        mp_initialize()
+        mp.plot(list(map(lambda g: g.x, genes)), list(map(lambda g: g.y, genes)),
+                color='red', marker='x', markersize=15, linestyle='None')
+        mp.show()
 
 
 def best():
@@ -91,5 +105,10 @@ def cross(a, b):
 
 genes = []
 for i in range(8):
-    genes.append(Gene(random.randrange(0, 255), random.randrange(0, 255)))
+    genes.append(Gene(random.randrange(1, 8192), random.randrange(1, 8192)))
+mp.title("generation=0")
+mp_initialize()
+mp.plot(list(map(lambda g: g.x, genes)), list(map(lambda g: g.y, genes)),
+        color='red', marker='x', markersize=15, linestyle='None')
+mp.show()
 print("answer is {0}".format(generate()))
