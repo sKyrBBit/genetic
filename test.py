@@ -1,5 +1,6 @@
 import random as r
 import numpy.random as nr
+import numpy as n
 
 
 def random_point():
@@ -10,10 +11,10 @@ def random_gene():
     return [r.randrange(0, 5 - i) for i in range(5)]
 
 
-def distance(a: (int, int), b: (int, int)):
+def distance(a: (float, float), b: (float, float)):
     x = a[0] - b[0]
     y = a[1] - b[1]
-    return x * x + y * y
+    return n.sqrt(x * x + y * y)
 
 
 def fitness(gene: list):
@@ -69,36 +70,40 @@ def cross(a: Gene, b: Gene):
 def select(g: list):
     while True:
         ps = map(probability, g)
-        ps = map(lambda p: round(p, 3), ps)
+        ps = map(lambda p: round(p, 8), ps)
         ps = list(ps).append(1 - sum(ps))
         n = Gene()
         g.append(n)
-        c = nr.choice(6, 1, p=ps)[0]
+        c = nr.choice(52, 1, p=ps)[0]
         if not(c is n):
             return g[c]
 
 
 def generate():
     g = genes.copy()
-    m1 = g[r.randrange(0, 7)]
-    g.remove(m1)
-    m2 = g[r.randrange(0, 6)]
-    g.remove(m2)
-    s = [mutate(m1), mutate(m2)]
-    for i in range(3):
-        s.extend(cross(select(g), select(g)))
-    return s
+    n = []
+    for i in range(2):  # save
+        t = select(g)
+        g.remove(t)
+        n.append(save(t))
+    for i in range(2):  # mutate
+        t = g[r.randrange(0, 59 - i)]
+        g.remove(t)
+        n.append(mutate(t))
+    for i in range(30):  # cross
+        n.extend(cross(select(g), select(g)))
+    return n
 
 
-A = random_point()
-B = random_point()
-C = random_point()
-D = random_point()
-E = random_point()
+A = (1.000, 0.000)
+B = (0.309, 0.951)
+C = (-0.809, 0.588)
+D = (-0.809, -0.588)
+E = (0.309, -0.951)
 cities = [A, B, C, D, E]
 print("A: {0}\nB: {1}\nC: {2}\nD: {3}\nE: {4}\n".format(A, B, C, D, E))
-genes = [Gene() for i in range(8)]
-for i in range(200):
+genes = [Gene() for i in range(64)]
+for i in range(256):
     print("genes?max={0}: [".format(max(map(lambda g: g.fitness, genes))))
     for g in genes:
         g.print()
