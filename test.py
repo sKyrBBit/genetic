@@ -1,6 +1,7 @@
 import random as r
 import numpy.random as nr
 import numpy as n
+import matplotlib.pyplot as mp
 
 
 def random_point():
@@ -19,14 +20,14 @@ def distance(a: (float, float), b: (float, float)):
 
 def fitness(gene: list):
     current = None
-    f = 0
+    d = 0
     c = cities.copy()
-    for g in gene:
+    for city in gene:
         if not (current is None):
-            f += distance(current, c[g])
-        current = c[g]
+            d += distance(current, c[city])
+        current = c[city]
         c.remove(current)
-    return 1 / f
+    return 1 / d
 
 
 class Gene:
@@ -44,7 +45,7 @@ class Gene:
 
 
 def probability(a: Gene):
-    return a.fitness / sum(map(lambda g: g.fitness, genes))
+    return a.fitness / sum(map(lambda gene: gene.fitness, genes))
 
 
 def save(a: Gene):
@@ -60,39 +61,39 @@ def mutate(a: Gene):
 def cross(a: Gene, b: Gene):
     c = a.gene.copy()
     d = b.gene.copy()
-    for i in range(r.randrange(0, 4), 4):  # swap elements at 'r.randrange(0, 4), 4' and after
+    for i in range(r.randrange(0, 4), 4):  # swap elements at 'r.randrange(0, 4)' and after
         e = d[i]
         d[i] = c[i]
         c[i] = e
     return Gene(c), Gene(d)
 
 
-def select(g: list):
+def select(l: list):
     while True:
-        ps = map(probability, g)
+        ps = map(probability, l)
         ps = map(lambda p: round(p, 8), ps)
         ps = list(ps).append(1 - sum(ps))
-        n = Gene()
-        g.append(n)
+        t = Gene()
+        l.append(t)
         c = nr.choice(52, 1, p=ps)[0]
-        if not(c is n):
-            return g[c]
+        if not(c is t):
+            return l[c]
 
 
 def generate():
     g = genes.copy()
-    n = []
+    s = []
     for i in range(2):  # save
         t = select(g)
         g.remove(t)
-        n.append(save(t))
+        s.append(save(t))
     for i in range(2):  # mutate
         t = g[r.randrange(0, 59 - i)]
         g.remove(t)
-        n.append(mutate(t))
+        s.append(mutate(t))
     for i in range(30):  # cross
-        n.extend(cross(select(g), select(g)))
-    return n
+        s.extend(cross(select(g), select(g)))
+    return s
 
 
 A = (1.000, 0.000)
@@ -101,11 +102,19 @@ C = (-0.809, 0.588)
 D = (-0.809, -0.588)
 E = (0.309, -0.951)
 cities = [A, B, C, D, E]
-print("A: {0}\nB: {1}\nC: {2}\nD: {3}\nE: {4}\n".format(A, B, C, D, E))
-genes = [Gene() for i in range(64)]
-for i in range(256):
-    print("genes?max={0}: [".format(max(map(lambda g: g.fitness, genes))))
-    for g in genes:
-        g.print()
-    print("]")
-    genes = generate()
+genes = []
+
+if __name__ == '__main__':
+    genes = [Gene() for i in range(64)]
+
+    for i in range(256):
+        mp.figure(figsize=(8, 8))
+        mp.title("generation={0}".format(i))
+        mp.plot(list(map(lambda city: city[0], cities)), list(map(lambda city: city[1], cities)),
+                marker='x', linestyle='None')
+        mp.show()
+        print("genes?max={0}: [".format(max(list(map(lambda gene: gene.fitness, genes)))))
+        for g in genes:
+            g.print()
+        print("]")
+        genes = generate()
