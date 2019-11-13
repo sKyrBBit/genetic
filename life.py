@@ -79,9 +79,15 @@ if __name__ == '__main__':
     lives = [Life() for i in range(1024)]
     # forests = 8
     forests = [random_forest() for i in range(8)]
+    pyplot.figure(figsize=(8, 8))
     pyplot.xlim(-512, 511)
     pyplot.ylim(-512, 511)
-    map(lambda forest: patches.Circle(xy=forests[0], radius=forest[1], color="green"), forests)
+    ax = pyplot.axes()
+    for f in forests:
+        c = patches.Circle(xy=f[0], radius=f[1], fc="lime", ec="mediumspringgreen")
+        ax.add_patch(c)
+    pyplot.axis('scaled')
+    ax.set_aspect('equal')
     pyplot.show()
     sys.exit(0)
     # generations = 128
